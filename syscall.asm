@@ -1,8 +1,16 @@
 .data
-titulo: .asciiz "Tall"
-input: .asciiz "Ingrese un numero del 1 -10\n"
-tall: .asciiz "tall"
-random: .asciiz "Random:"
+coca_cola: .asciiz "coca cola"
+fanta: .asciiz "Fanta"
+sprite: .asciiz "sprite"
+inca: .asciiz "Inca coola"
+agua: .asciiz "Agua"
+gatorade_naranja: .asciiz "Gatorade naranja"
+gatorade_lima: .asciiz "Gatorade lima"
+esporade_mandarina: .asciiz "Esporade mandarina"
+esporade_manzana: .asciiz "Esporade manzana"
+lipton_tea: .asciiz "liption tea"
+brisk_lemon_tea: .asciiz "brisk lemon tea"
+
 salto_linea: .asciiz "\n"
 
 .text
