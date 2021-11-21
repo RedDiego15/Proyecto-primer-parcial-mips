@@ -190,21 +190,3 @@ imprimirMsgStock:
 	la $a0,msg_stock
 	syscall
 	jr $ra
-	
-	
-
-	
-
-	
-	
-	
-	
-	
-
-	
-
-
-
-
-
-
