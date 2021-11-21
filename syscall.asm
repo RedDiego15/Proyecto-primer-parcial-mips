@@ -11,9 +11,9 @@ esporade_manzana: .asciiz "9. Esporade manzana 10$\n"
 lipton_tea: .asciiz "10. liption tea 10$\n"
 brisk_lemon_tea: .asciiz "11. brisk lemon tea 10$\n"
 
-array: .word coca_cola, fanta, sprite,inca,gatorade_lima, esporade_mandarina, esporade_manzana, lipton_tea, brisk_lemon_tea
-array_stock: .word 5,5,5,5,5,5,5,5,5,5,5
-array_precios: .word 10,10,10,10,10,10,10,10,10,10,10
+array: .word coca_cola, fanta, sprite
+array_stock: .word 0,5,5
+array_precios: .word 10,10,10
 
 input: .asciiz "Ingrese\n"
 billetes: .word 1,5,10,20
@@ -23,6 +23,7 @@ input_tipo_dinero: .asciiz "1. Ingreso Billetes\n2. Ingreso Monedas\n3. Salir\nI
 input_billete: .asciiz "Ingrese valor del billete\n"
 input_continue_ingreso: .asciiz "Desea Ingresar mas Dinero?\n 1.Si\nInserte cualquier digito para continuar\n "
 
+msg_stock: .asciiz "Este producto tiene un stock menor a 15%\n"
 .text
 
 #main
@@ -31,23 +32,16 @@ maquina:
 	#mostrar productos disponibles y stock
 	li $a0,0
 	jal mostrarProductos
-	li $t1,1 #VOLVI A MAQUINA
 	
 	
-	
-	
-	
-	
-	
-	
-	#li $v0, 4
-	#la $a0, input_tipo_dinero
-	#syscall	
-	#li $v0, 5	#pide que se ingrese un numero entero
-	#syscall
-	#move $t0,$v0	#$t0 almacena la opcion de si va ingresar billetes o monedas
-	#beq $t0,1,cuentaBilletes
-	#li $t1,1 #vuelvo a MAQUINA
+	li $v0, 4
+	la $a0, input_tipo_dinero
+	syscall	
+	li $v0, 5	#pide que se ingrese un numero entero
+	syscall
+	move $t0,$v0	#$t0 almacena la opcion de si va ingresar billetes o monedas
+	beq $t0,1,cuentaBilletes
+
 	#beq $t0,2,cuentaMonedas
 	#beq $t0,3,salir
 	
@@ -58,22 +52,16 @@ cuentaBilletes:
 	li $a0, 0	#acumulador
 	jal loopPedirBilletes
 	move $t0,$v0  #t0 almacena el total de dinero ingresado
-	li $t1,1 #vuelvo al main
+	li $t1,1 #VUELVO CUENTABILLETES solo sirve para ver en del debugg si volvo a la funcion
+	
+	#codigo que hacer una vez tengo el total de dinero ingresado en $t0
+	
+	
 	
 	
 	lw $ra,0($sp)
 	addi $sp,$sp,-4
 	li $v0,1 #retorno de cuenta billetes
-	
-	
-	
-	#codigo que hacer una vez tengo el total de dinero ingresado en $t1
-	
-	
-	
-	
-	#a esta funcion no hay que hacerle jr ra
-	jal maquina #para volver al menu principal
 	
 loopPedirBilletes:
 	
@@ -138,26 +126,76 @@ validarBilletes:
 	
 #funcion que muestra los productos
 mostrarProductos:
-	move $s1,$a0
+
+	addi $sp,$sp,4
+	sw $ra,0($sp)
+
+
+	move $s1,$a0 	#en s1 almaceno el valor i 
 	la $t0, array #arreglo de productos
-	li $t1,11	#longitud del array de productos
+	la $t6, array_stock
+	li $t1,3	#longitud del array de productos
 	slt $t2,$a0,$t1	  #t2=1 si i<length del array
 	beq $t2,$zero,exit
 	
-	sll $t3,$a0,2	#i*4
+	sll $t3,$a0,2	#i*4 para producti
+	sll $t7,$a0,2 	#i*4 para stock
 	add $t3,$t3,$t0
+	add $t7,$t7,$t6
 	addi $s1,$s1,1	#i+=1
 	
-	lw $t4,0($t3)
+	lw $t4,0($t3) #producto
+	lw $t5,0($t7) #stock del producto
+	
+	#imprimo el producto
 	li $v0, 4
-	move $a0,$t4
-	syscall
+	move $a0,$t4	#para que imprima el producto
+	syscall	
+	
+	#calculo de porcentaje
+	li $t8,100
+	mult $t5,$t8
+	mflo $t5 
+	#ahora divido para el total de stock que hay 
+	li $s2,5	#5 es el total de stockmaximo de los productos 
+	div $t5,$s2
+	mflo $t5	#almaceno el valor del cociente
+	
+	li $t8,15	#porcentaje minimo
+	slt $t9,$t5,$t8 # t9 = 1 si el porcentaje de stock del producto es menor que 15
+	move $a0,$t9
+	jal validaStock
+	
 	move $a0,$s1
+	
+	lw $ra,0($sp)
+	addi $sp,$sp,-4
 	j mostrarProductos
 	
 	
 exit:
+	lw $ra,0($sp)
+	addi $sp,$sp,-4
 	jr $ra
+	
+	
+validaStock:
+
+	bne $a0,$zero,imprimirMsgStock
+	jr $ra
+
+imprimirMsgStock:
+
+	li $v0, 4
+	la $a0,msg_stock
+	syscall
+	jr $ra
+	
+	
+
+	
+
+	
 	
 	
 	
