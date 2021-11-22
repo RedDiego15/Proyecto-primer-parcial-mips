@@ -16,12 +16,16 @@ array_stock: .word 0,5,5
 array_precios: .word 5,10,10
 
 
+acum: .float 0.0
+
 input: .asciiz "Ingrese\n"
 billetes: .word 1,5,10,20
+monedas: .float 0.05,0.10,0.25,0.50,1.00
 temp: .space 4
 
 input_tipo_dinero: .asciiz "1. Ingreso Billetes\n2. Ingreso Monedas\n3. Salir\nIngrese opcion\n "
 input_billete: .asciiz "Ingrese valor del billete\n"
+input_moneda: .asciiz "Ingrese valor de la moneda\n"
 input_continue_ingreso: .asciiz "Desea Ingresar mas Dinero?\n 1.Si\n2. Para continuar sin ingresar mas dinero\n "
 input_producto: .asciiz "Ingrese el numero del producto que desea\n"
 msg_stock: .asciiz "Este producto tiene un stock menor a 15%\n"
@@ -30,7 +34,6 @@ msg_stock: .asciiz "Este producto tiene un stock menor a 15%\n"
 #main
 maquina:
 
-	
 	#mostrar productos disponibles y stock
 	#li $a0,0
 	#jal mostrarProductos
@@ -61,19 +64,91 @@ maquina:
 
 	li $t1,1 #VUELVO A MAQUINA
 
-	#beq $t0,2,cuentaMonedas
-	#beq $t0,3,salir
-
-
 
 ejecutaCompra:
-
-
 	beq $a0,1,cuentaBilletes
 	beq $t0,2,cuentaMonedas
 	beq $t0,3,salir
 
 salir:
+	jr $ra
+
+
+cuentaMonedas:
+	addi $sp,$sp,-4
+	sw $ra,0($sp)
+	l.s $f1, acum
+	jal loopPedirMonedas
+	#en f1 esta el total de dinero ingresado
+	
+	
+	
+	lw $ra,0($sp)
+	addi $sp,$sp,4
+	jr $ra
+
+loopPedirMonedas:
+	addi $sp,$sp,-4
+	sw $ra,0($sp)
+
+	jal pedirMonedas
+	#f13 contiene el valor del flotante ingresado
+	add.s $f1, $f1, $f13
+	
+	li $v0, 4
+	la $a0, input_continue_ingreso
+	syscall
+	li $v0, 5
+	syscall
+	
+	move $t0, $v0
+	lw $ra,0($sp)
+	
+	addi $sp,$sp,4
+	beq $t0,1, loopPedirMonedas
+	jr $ra 
+	
+pedirMonedas:
+	addi $sp,$sp,-4
+	sw $ra,0($sp)
+
+	li $v0, 4
+	la $a0, input_moneda
+	syscall
+	li $v0, 6
+	syscall
+	mov.s $f13, $f0 #almaceno en f0 el valor ingresado
+	
+	li $a1,0 	#i=0
+	jal validarMonedas
+	move $t0,$v0	#t0=0 si es el billete es incorrecto
+	beq $t0,$zero,volverApedirMonedas
+
+	lw $ra,0($sp)
+	addi $sp,$sp,4
+
+	jr $ra
+
+volverApedirMonedas:
+	lw $ra,0($sp)
+	addi $sp,$sp,4
+	j pedirMonedas
+
+#retorna 1 si la moneda es correcta, 0 si es incorrecta
+validarMonedas:
+	la $s0, monedas #arreglo de monedas
+	li $t3,5 #constante length = 5
+	slt $t4, $a1, $t3 # i<3 , 1 True, 0 False
+	bne $t4,1, noEncontrado 
+	#caculate offset
+	sll $t0,$a1,2
+	add $t2,$s0,$t0  
+	lwc1 $f2,0($t2) #monedas[i]
+	
+	
+	c.ne.s $f2,$f13
+	bc1t validarMonedas
+	li $v0,1
 	jr $ra
 
 cuentaBilletes:
@@ -110,7 +185,7 @@ loopPedirBilletes:
 
 	move $s0,$a0	#guardo el parametro del total en S0 acumulador
 
-	jal pedirDinero
+	jal pedirBilletes
 	move $a0,$v0	#a0 es el valor del dinero Ingresado
 
 
@@ -138,7 +213,7 @@ loopPedirBilletes:
 	jr $ra 
 
 
-pedirDinero:
+pedirBilletes:
 	addi $sp,$sp,-4
 	sw $ra,0($sp)
 
@@ -154,17 +229,17 @@ pedirDinero:
 
 	jal validarBilletes
 	move $t0,$v0	#t0=0 si es el billete es incorrecto
-	beq $t0,$zero,volverApedir
+	beq $t0,$zero,volverApedirBilletes
 
 	lw $ra,0($sp)
 	addi $sp,$sp,4
 
 	jr $ra
 
-volverApedir:
+volverApedirBilletes:
 	lw $ra,0($sp)
 	addi $sp,$sp,4
-	j pedirDinero
+	j pedirBilletes
 
 #funcion que retorna 1 si el billetes es correcto
 # o 0 si esl billete es incorrecto
@@ -177,8 +252,8 @@ validarBilletes:
 	add $t5,$t0, $t5 # La base del arreglo es billetes
 	lw $t6, 0($t5) #Billetes[i]
 	addi $a1,$a1,1 # i+1
-	bne $t6,$a0,validarBilletes 	
-	move $v0,$a0
+	bne $t6,$a0,validarBilletes 
+	li $v0, 1
 	jr $ra
 
 noEncontrado:
