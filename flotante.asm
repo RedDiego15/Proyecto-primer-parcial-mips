@@ -2,26 +2,14 @@
 
 precios: .float 1.40,1.00,1.20
 acum: .float 0.0
-fpconst1: .float 1.6
-fpconst2: .float 1.4
+fpconst2: .float 1.6
 input: .asciiz "Ingrese valor \n"
 .text
 li $t1,0 #i=0
 
-#resta
-l.s $f1, fpconst1
 li $v0, 2
-mov.s $f12, $f1 #imrpimir resta
+mov.s $f12, $f1 #imrpimir suma
 syscall
-l.s $f2, fpconst2
-li $v0, 2
-mov.s $f12, $f2 #imrpimir resta
-syscall
-sub.s $f3, $f1, $f2 #imrpimir resta
-li $v0, 2
-mov.s $f12, $f3 #imrpimir resta
-syscall
-
 
 forPrecios: 
 	la $s0, precios #arreglo de precios

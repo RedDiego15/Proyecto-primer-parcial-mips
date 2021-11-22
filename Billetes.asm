@@ -82,7 +82,12 @@ cuentaMonedas:
 	l.s $f1, acum
 	jal loopPedirMonedas
 	#en f1 esta el total de dinero ingresado
-	#Realizo la resta 
+	#Transformo el precio del producto en flotante, el precio esta en a1
+	
+	#Realizo la resta entre el acumulador
+	#sub $f4,$f1,
+	
+	#SOLO LA RESTA NO HACE FALTA NADA MAS
 	
 	
 	
