@@ -146,8 +146,12 @@ validarMonedas:
 	lwc1 $f2,0($t2) #monedas[i]
 	
 	
-	c.ne.s $f2,$f13
-	bc1t validarMonedas
+	#li.d $f0, 0        # store the value 0 in register $f0
+	#c.ne.d $f0, $f2    # $f0 != $f2?
+	#bc1t loop          # if true, branch to the label called "loop"
+	
+	
+	bne $f2,$f13,validarMonedas
 	li $v0,1
 	jr $ra
 
