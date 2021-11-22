@@ -67,8 +67,8 @@ maquina:
 
 ejecutaCompra:
 	beq $a0,1,cuentaBilletes
-	beq $t0,2,cuentaMonedas
-	beq $t0,3,salir
+	beq $a0,2,cuentaMonedas
+	beq $a0,3,salir
 
 salir:
 	jr $ra
@@ -80,7 +80,7 @@ cuentaMonedas:
 	l.s $f1, acum
 	jal loopPedirMonedas
 	#en f1 esta el total de dinero ingresado
-	
+	#Realizo la resta 
 	
 	
 	lw $ra,0($sp)
@@ -100,8 +100,9 @@ loopPedirMonedas:
 	syscall
 	li $v0, 5
 	syscall
+	move $t0, $v0 #t0= opcion por si quiere seguir anadiendo monedas
 	
-	move $t0, $v0
+	
 	lw $ra,0($sp)
 	
 	addi $sp,$sp,4
@@ -144,14 +145,17 @@ validarMonedas:
 	sll $t0,$a1,2
 	add $t2,$s0,$t0  
 	lwc1 $f2,0($t2) #monedas[i]
+	addi $a1,$a1,1
 	
 	
 	#li.d $f0, 0        # store the value 0 in register $f0
 	#c.ne.d $f0, $f2    # $f0 != $f2?
 	#bc1t loop          # if true, branch to the label called "loop"
 	
+	c.eq.s $f2,$f13
+	bc1f validarMonedas
 	
-	bne $f2,$f13,validarMonedas
+	#bne $f2,$f13,validarMonedas
 	li $v0,1
 	jr $ra
 
