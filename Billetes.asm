@@ -83,17 +83,18 @@ cuentaMonedas:
 	jal loopPedirMonedas
 	#en f1 esta el total de dinero ingresado
 	#Transformo el precio del producto en flotante, el precio esta en a1
+	mtc1 $a1, $f4 	#mover v0 a f0, se pasa la direccion
+	cvt.s.w $f4, $f4 #convertir la direccion a float
+	#Realizo la resta entre el acumulador y el precio
+	sub.s $f5, $f1, $f4 #restar 2 floats
 	
-	#Realizo la resta entre el acumulador
-	#sub $f4,$f1,
-	
-	#imprimir la resta
-	
-	#SOLO LA RESTA NO HACE FALTA NADA MAS
-	
-	
-	
-	
+	li $v0, 4 #imprimir vuelto
+	la $a0, msg_vuelto
+	syscall	
+	li $v0, 2 #imprimir la resta float
+       	mov.s $f12, $f5        	
+       	syscall
+       	
 	lw $ra,0($sp)
 	addi $sp,$sp,4
 	jr $ra
