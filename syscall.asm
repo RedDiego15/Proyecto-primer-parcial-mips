@@ -129,7 +129,7 @@ loopPedirBilletes:
 	move $a0,$s0	#almaceno el valor del billete ingresado para mandarlo como argumento al loop de billetes
 	beq $t0,1, loopPedirBilletes
 	jal restaDinero
-	j maquina
+	
 	move $v0,$a0
 	
 	lw $a0,0($sp)
