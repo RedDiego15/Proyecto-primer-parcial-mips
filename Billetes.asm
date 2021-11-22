@@ -12,9 +12,8 @@ lipton_tea: .asciiz "10. liption tea 10$\n"
 brisk_lemon_tea: .asciiz "11. brisk lemon tea 10$\n"
 
 array: .word coca_cola, fanta, sprite
-array_stock: .word 0,5,5
+array_stock: .word 2,5,5
 array_precios: .word 5,10,10
-
 input: .asciiz "Ingrese\n"
 billetes: .word 1,5,10,20
 temp: .space 4
@@ -24,12 +23,11 @@ input_billete: .asciiz "Ingrese valor del billete\n"
 input_continue_ingreso: .asciiz "Desea Ingresar mas Dinero?\n 1.Si\n2. Para continuar sin ingresar mas dinero\n "
 input_producto: .asciiz "Ingrese el numero del producto que desea\n"
 msg_stock: .asciiz "Este producto tiene un stock menor a 15%\n"
+resta: .asciiz "Resta\n"
 .text
 
 #main
 maquina:
-	
-
 	#mostrar productos disponibles y stock
 	#li $a0,0
 	#jal mostrarProductos
@@ -63,46 +61,48 @@ maquina:
 	#beq $t0,2,cuentaMonedas
 	#beq $t0,3,salir
 	
-	
 
 ejecutaCompra:
-	
-	
-	beq $a0,1,cuentaBilletes
-	
+	addi $sp,$sp,-4
+	sw $ra,0($sp)
+	beq $a0,1,cuentaBilletes	
 	#beq $t0,2,cuentaMonedas
 	beq $t0,3,salir
-	
+	lw $ra,0($sp)
+	addi $sp,$sp,4
+	jr $ra
 salir:
 	jr $ra
 
-cuentaBilletes:
-	
+cuentaBilletes:	
 	addi $sp,$sp,-4
 	sw $ra,0($sp)
-	move $s3,$a1
+	move $s3,$a1  #s3 contiene el precio del producto
 	li $a0, 0	#acumulador
 	jal loopPedirBilletes
-	move $t0,$v0  #t0 almacena el total de dinero ingresado
+	move $s4,$v0  #t0 almacena el total de dinero ingresado
 	li $t1,1 #VUELVO CUENTABILLETES solo sirve para ver en del debugg si volvo a la funcion
 	
-	#codigo que hacer una vez tengo el total de dinero ingresado en $t0
-	sub $t2,$t0,$s3 #cambio a dar
-	
-	#codigo para imprimir la resta que esta en $t2
-	#li $v0, 4
-	#move $a0, $t2
-	#syscall
-	
-	#Esto solo para que el programa se quede esperando
-	li $v0, 4
-	la $a0, input_producto
-	syscall	
-	
-	#funcion que reste el stock de ese producto
-	li $t7,1 #VERIFICA A2
 	lw $ra,0($sp)
 	
+	addi $sp,$sp,4
+	jr $ra
+	
+restaDinero: 
+	addi $sp,$sp,-4
+	sw $ra,0($sp)
+	#codigo que hacer una vez tengo el total de dinero ingresado en $t0
+	sub $t2,$s2,$s3 #cambio a dar
+	
+	#codigo para imprimir la resta que esta en $t2
+	li $v0, 1
+	move $a0, $t2
+	syscall
+		
+	#funcion que reste el stock de ese producto
+	li $t7,1 #VERIFICA A2
+	
+	lw $ra,0($sp)	
 	addi $sp,$sp,4
 	jr $ra
 	
@@ -113,15 +113,11 @@ loopPedirBilletes:
 	sw $ra,4($sp)
 	sw $s0,8($sp)
 	
-	move $s0,$a0	#guardo el parametro del total en S0 acumulador
-	
+	move $s2,$a0	#guardo el parametro del total en Sa0 acumulador
 	jal pedirDinero
-	move $a0,$v0	#a0 es el valor del dinero Ingresado
-	
-	
+	move $s0,$v0	#a0 es el valor del dinero Ingresado	
 	#Hasta este punto estoy seguro que $v0 de la llamada validar billetes contiene un numero correcto de billete
-	
-	add $s0,$s0,$v0 #le sumo al acumulador el valor del billete ingresado
+	add $s2,$s2,$s0 #le sumo al acumulador el valor del billete ingresado
 	
 	li $v0, 4
 	la $a0, input_continue_ingreso
@@ -130,17 +126,18 @@ loopPedirBilletes:
 	syscall
 	move $t0, $v0
 	
-	lw $a0,0($sp)
-	lw $ra,4($sp)
-	
 	move $a0,$s0	#almaceno el valor del billete ingresado para mandarlo como argumento al loop de billetes
+	beq $t0,1, loopPedirBilletes
+	jal restaDinero
+	j maquina
+	move $v0,$a0
+	
+	lw $a0,0($sp)
+	lw $ra,4($sp)	
 	lw $s0,8($sp)
 	addi $sp,$sp,12
-	
-	beq $t0,1, loopPedirBilletes
-	
-	move $v0,$a0
 	jr $ra 
+	
 	
 
 pedirDinero:

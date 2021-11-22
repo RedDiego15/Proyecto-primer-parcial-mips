@@ -81,7 +81,8 @@ ingresoMonedas:
 	syscall
 	li $v1, 5 #Leer entero
 	syscall
-	beq $v1,1,ingresoMonedas
+	beq $v1,1,mostrarProductos
+	j ingresoMonedas
 	
 sumarMonedas:
 	addi $sp,$sp,-8
