@@ -63,15 +63,17 @@ maquina:
 	jal ejecutaCompra
 
 	li $t1,1 #VUELVO A MAQUINA
+	j maquina
 
 
 ejecutaCompra:
 	beq $a0,1,cuentaBilletes
 	beq $a0,2,cuentaMonedas
 	beq $a0,3,salir
+	
 
 salir:
-	jr $ra
+	#terminar programa
 
 
 cuentaMonedas:
@@ -81,6 +83,8 @@ cuentaMonedas:
 	jal loopPedirMonedas
 	#en f1 esta el total de dinero ingresado
 	#Realizo la resta 
+	
+	
 	
 	
 	lw $ra,0($sp)
