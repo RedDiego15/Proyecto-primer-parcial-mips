@@ -87,6 +87,8 @@ cuentaMonedas:
 	#Realizo la resta entre el acumulador
 	#sub $f4,$f1,
 	
+	#imprimir la resta
+	
 	#SOLO LA RESTA NO HACE FALTA NADA MAS
 	
 	
