@@ -190,12 +190,19 @@ cuentaBilletes:
 	#codigo que hacer una vez tengo el total de dinero ingresado en $t0
 	sub $t2,$t0,$s3 #cambio a dar
 
-	#Esto solo para que el programa se quede esperando
-	li $v0, 1
-	la $a0, input_producto
+	#actualizo el stock a2=idx 
+	jal actualizaStock
+	
+	
+	li $v0, 4 #imprimir vuelto
+	la $a0, msg_vuelto
 	syscall	
+	li $v0, 4
+	move $a0,$t2	#para que imprimo la resta
+	syscall	
+	
 
-	#funcion que reste el stock de ese producto
+	
 	li $t7,1 #VERIFICA A2
 	lw $ra,0($sp)
 
