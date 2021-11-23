@@ -11,9 +11,9 @@ esporade_manzana: .asciiz "9. Esporade manzana 10$\n"
 lipton_tea: .asciiz "10. liption tea 10$\n"
 brisk_lemon_tea: .asciiz "11. brisk lemon tea 10$\n"
 
-array: .word coca_cola, fanta, sprite
-array_stock: .word 0,2,15
-array_precios: .word 5,10,10
+array: .word coca_cola, fanta, sprite,inca,agua,gatorade_naranja,gatorade_lima,_esporade_mandarina,esporade_manzana,lipton_tea,brisk_lemon_tea
+array_stock: .word 0,2,15,15,15,15,15,15,15,15,15,15
+array_precios: .word 1,2,1,2,3,2,1,3,1,3,2
 
 
 acum: .float 0.0
