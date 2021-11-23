@@ -12,7 +12,7 @@ lipton_tea: .asciiz "10. liption tea 10$\n"
 brisk_lemon_tea: .asciiz "11. brisk lemon tea 10$\n"
 
 array: .word coca_cola, fanta, sprite
-array_stock: .word 0,5,5
+array_stock: .word 0,2,15
 array_precios: .word 5,10,10
 
 
@@ -23,20 +23,21 @@ billetes: .word 1,5,10,20
 monedas: .float 0.05,0.10,0.25,0.50,1.00
 temp: .space 4
 
-input_tipo_dinero: .asciiz "1. Ingreso Billetes\n2. Ingreso Monedas\n3. Salir\nIngrese opcion\n "
+input_tipo_dinero: .asciiz "\n1. Ingreso Billetes\n2. Ingreso Monedas\n3. Salir\nIngrese opcion\n "
 input_billete: .asciiz "Ingrese valor del billete\n"
 input_moneda: .asciiz "Ingrese valor de la moneda\n"
 input_continue_ingreso: .asciiz "Desea Ingresar mas Dinero?\n 1.Si\n2. Para continuar sin ingresar mas dinero\n "
 input_producto: .asciiz "Ingrese el numero del producto que desea\n"
 msg_stock: .asciiz "Este producto tiene un stock menor a 15%\n"
+msg_vuelto: .asciiz "Su cambio es:"
 .text
 
 #main
 maquina:
 
 	#mostrar productos disponibles y stock
-	#li $a0,0
-	#jal mostrarProductos
+	li $a0,0
+	jal mostrarProductos
 
 	#escoger el producto
 	li $v0, 4
@@ -79,14 +80,19 @@ salir:
 cuentaMonedas:
 	addi $sp,$sp,-4
 	sw $ra,0($sp)
+	move $s3,$a1
 	l.s $f1, acum
 	jal loopPedirMonedas
 	#en f1 esta el total de dinero ingresado
 	#Transformo el precio del producto en flotante, el precio esta en a1
-	mtc1 $a1, $f4 	#mover v0 a f0, se pasa la direccion
+	mtc1 $s3, $f4 	#mover v0 a f0, se pasa la direccion
 	cvt.s.w $f4, $f4 #convertir la direccion a float
 	#Realizo la resta entre el acumulador y el precio
 	sub.s $f5, $f1, $f4 #restar 2 floats
+	
+	#actualizo el stock a2=idx 
+	jal actualizaStock
+	
 	
 	li $v0, 4 #imprimir vuelto
 	la $a0, msg_vuelto
@@ -358,3 +364,15 @@ escogerProducto:
 	lw $t3,0($t2)	#t3= el precio de ese producto
 	move $v0,$t3
 	jr $ra
+
+#funcion que actualiza el stock
+actualizaStock:
+	la $t0, array_stock
+	sll $t1,$a2,2
+	add $t2,$t1,$t0
+	lw $t3,0($t2)
+	addi $t3,$t3,-1
+	sw $t3,0($t2)
+	jr $ra
+	
+
