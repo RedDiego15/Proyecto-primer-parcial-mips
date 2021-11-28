@@ -1,17 +1,17 @@
 .data
-coca_cola: .asciiz "1. coca cola 10$\n"
-fanta: .asciiz "2. Fanta 10$\n"
-sprite: .asciiz "3. sprite 10$\n"
-inca: .asciiz "4. Inca coola 10$\n"
-agua: .asciiz "5. Agua 10$\n"
-gatorade_naranja: .asciiz "6. Gatorade naranja 10$\n"
-gatorade_lima: .asciiz "7. Gatorade lima 10$\n"
-esporade_mandarina: .asciiz "8. Esporade mandarina 10$\n"
-esporade_manzana: .asciiz "9. Esporade manzana 10$\n"
-lipton_tea: .asciiz "10. liption tea 10$\n"
-brisk_lemon_tea: .asciiz "11. brisk lemon tea 10$\n"
+coca_cola: .asciiz "\n1. coca cola 1$\n"
+fanta: .asciiz "2. Fanta 2$\n"
+sprite: .asciiz "3. sprite 1$\n"
+inca: .asciiz "4. Inca coola 2$\n"
+agua: .asciiz "5. Agua 3$\n"
+gatorade_naranja: .asciiz "6. Gatorade naranja 2$\n"
+gatorade_lima: .asciiz "7. Gatorade lima 1$\n"
+esporade_mandarina: .asciiz "8. Esporade mandarina 3$\n"
+esporade_manzana: .asciiz "9. Esporade manzana 1$\n"
+lipton_tea: .asciiz "10. liption tea 3$\n"
+brisk_lemon_tea: .asciiz "11. brisk lemon tea 2$\n"
 
-array: .word coca_cola, fanta, sprite,inca,agua,gatorade_naranja,gatorade_lima,_esporade_mandarina,esporade_manzana,lipton_tea,brisk_lemon_tea
+array: .word coca_cola, fanta, sprite,inca,agua,gatorade_naranja,gatorade_lima,esporade_mandarina,esporade_manzana,lipton_tea,brisk_lemon_tea
 array_stock: .word 0,2,15,15,15,15,15,15,15,15,15,15
 array_precios: .word 1,2,1,2,3,2,1,3,1,3,2
 
@@ -29,7 +29,7 @@ input_moneda: .asciiz "Ingrese valor de la moneda\n"
 input_continue_ingreso: .asciiz "Desea Ingresar mas Dinero?\n 1.Si\n2. Para continuar sin ingresar mas dinero\n "
 input_producto: .asciiz "Ingrese el numero del producto que desea\n"
 msg_stock: .asciiz "Este producto tiene un stock menor a 15%\n"
-msg_vuelto: .asciiz "Su cambio es:"
+msg_vuelto: .asciiz "Su cambio es: "
 .text
 
 #main
@@ -75,6 +75,7 @@ ejecutaCompra:
 
 salir:
 	#terminar programa
+	jr $ra
 
 
 cuentaMonedas:
@@ -185,21 +186,22 @@ cuentaBilletes:
 	li $a0, 0	#acumulador
 	jal loopPedirBilletes
 	move $t0,$v0  #t0 almacena el total de dinero ingresado
-	li $t1,1 #VUELVO CUENTABILLETES solo sirve para ver en del debugg si volvo a la funcion
 
 	#codigo que hacer una vez tengo el total de dinero ingresado en $t0
 	sub $t2,$t0,$s3 #cambio a dar
+	
+	li $v0, 4 #imprimir vuelto
+	la $a0, msg_vuelto
+	syscall	
+	li $v0, 1
+	move $a0,$t2	#para que imprimo la resta
+	syscall	
 
 	#actualizo el stock a2=idx 
 	jal actualizaStock
 	
 	
-	li $v0, 4 #imprimir vuelto
-	la $a0, msg_vuelto
-	syscall	
-	li $v0, 4
-	move $a0,$t2	#para que imprimo la resta
-	syscall	
+	
 	
 
 	
@@ -266,6 +268,8 @@ pedirBilletes:
 
 	lw $ra,0($sp)
 	addi $sp,$sp,4
+	
+	move $v0,$a0
 
 	jr $ra
 
@@ -306,7 +310,7 @@ mostrarProductos:
 	move $s1,$a0 	#en s1 almaceno el valor i 
 	la $t0, array #arreglo de productos
 	la $t6, array_stock
-	li $t1,3	#longitud del array de productos
+	li $t1,11	#longitud del array de productos
 	slt $t2,$a0,$t1	  #t2=1 si i<length del array
 	beq $t2,$zero,exit
 
@@ -329,7 +333,7 @@ mostrarProductos:
 	mult $t5,$t8
 	mflo $t5 
 	#ahora divido para el total de stock que hay 
-	li $s2,5	#5 es el total de stockmaximo de los productos 
+	li $s2,15	#15 es el total de stockmaximo de los productos 
 	div $t5,$s2
 	mflo $t5	#almaceno el valor del cociente
 
